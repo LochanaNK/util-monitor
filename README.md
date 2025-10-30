@@ -1,21 +1,34 @@
-This is a small IoT project I did for fun and to learn more about IoT, which is a PC resource monitor.
+A tiny IoT project I built for fun to learn more about IoT and hardware monitoring. It runs a lightweight Python app on your PC that publishes system stats over MQTT to an ESP32, which shows the data on a small TFT display. Simple, local, and educational — perfect for learning networking, embedded systems, and system instrumentation.
 
-How it works,
+🔧 How it works
 
-  I created a Python exe file to run in the system tray to get the resource data and publish them to the ESP-32.
-  I used Eclipse Mosquitto MQTT for this and it runs only locally.
-  Then, using the ESP-32 Wi-Fi, I connect to the same Wi-Fi as the PC connected to.
-  Using MQTT, the data will be received as JSON objects, and the Arduino sketch will read them and display them on a small TFT display.
-  I used OpenHardWareMonitor library to get the pc resource data.
+  💠I package a Python script into a small executable that runs in the system tray on Windows.
+  💠The script uses OpenHardwareMonitor and psutil to collect CPU usage, memory stats, and CPU temperature.
+  💠It publishes the readings as JSON to a local Mosquitto MQTT broker running on the same network (localhost).
+  💠An ESP32 connected to the same Wi-Fi subscribes to the MQTT topic, parses the JSON, and displays the stats on a TFT using an Arduino sketch.
 
-Issues with this setup,
+⚠️ Current issues
 
-  The Python exe file is not created to meet the security requirements of Windows Defender since I do not have knowledge of that yet, so it might be considered as a threat.
-  The hardware library I used is somehow considered a threat by Windows Defender  as well.
+  💠Windows Defender sometimes flags the generated Python .exe (and the OpenHardwareMonitor DLL) as suspicious. This is because bundlers and DLL loads look like packed/obfuscated binaries to heuristics.
+  💠The app runs locally and needs a trusted build/signing to avoid false positives.
+  💠MQTT messages can become noisy — some optimization of publish frequency and payload structure would help reduce clutter.
 
-Future Improvements,
+✨ Planned improvements
 
-  Fixing all the issues mentioned above.
-  Adding more utilities to monitor and display.
-  Optimizing the Mosquitto publishing and subscription so data would not get cluttered.
-  And hopefully add graphs and a separate scripts to monitor and calculate avg values and suggestions to improve based on the calculations.
+  💠Fix Defender warnings
+    • Produce a cleaner PyInstaller build, add metadata, and (ideally) sign the binary with a code-signing certificate.
+  💠Harden the hardware DLL handling
+    • Ship the DLL responsibly, document it, and avoid suspicious packing/compression.
+  💠Optimize MQTT
+    • Tune publish frequency, use compact payloads, and add QoS/topic structure to avoid clutter.
+  💠More utilities & analytics
+    • Add more sensors, compute rolling averages, and provide suggestions (e.g., "CPU high — check background processes").
+  💠Visualization & history
+    • Add small graphs on the ESP32 or a separate script/server that stores and graphs historical data.
+
+🧩 Tech stack
+
+  💠Python (psutil, pystray, paho-mqtt, pythonnet/CLR for OpenHardwareMonitor)
+  💠OpenHardwareMonitorLib.dll for Windows sensor data
+  💠Mosquitto (local) as MQTT broker
+  💠ESP32 + TFT display (Arduino sketch) to render the dashboard
